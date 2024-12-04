@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Data Viewer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <style>
+        body {
+            padding: 20px;
+        }
+        table {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="text-center">Stock Data Viewer</h1>
+
+    <!-- Dropdown Form -->
+    <form method="post" action="/data" class="d-flex justify-content-center my-4">
+        <div class="form-group me-2">
+            <label for="issuer_code" class="form-label">Select Issuer Code:</label>
+            <select name="issuer_code" id="issuer_code" class="form-select">
+                <option value="" disabled>Select an issuer code</option>
+                {% for code in issuer_codes %}
+                <option value="{{ code }}" {% if code == issuer_code %}selected{% endif %}>{{ code }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </form>
+
+    <!-- Stock Data Table -->
+    {% if stock_data %}
+    <table class="table table-bordered">
+        <thead class="table-dark">
+        <tr>
+            <th>Date</th>
+            <th>Last Trade Price</th>
+            <th>Max Price</th>
+            <th>Min Price</th>
+            <th>Avg Price</th>
+            <th>Percentage Change</th>
+            <th>Volume</th>
+            <th>Turnover Best</th>
+            <th>Total Turnover</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for row in stock_data %}
+        <tr>
+            <td>{{ row['date'] }}</td>
+            <td>{{ row['last_trade_price'] }}</td>
+            <td>{{ row['max_price'] }}</td>
+            <td>{{ row['min_price'] }}</td>
+            <td>{{ row['avg_price'] }}</td>
+            <td>{{ row['percentage_change'] }}</td>
+            <td>{{ row['volume'] }}</td>
+            <td>{{ row['turnover_best'] }}</td>
+            <td>{{ row['total_turnover'] }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Go Back Button -->
+    <div class="text-center mt-4">
+        <a href="/" class="btn btn-secondary">Go Back</a>
+    </div>
+    {% else %}
+    <p class="text-center text-muted">No data available for the selected Issuer Code.</p>
+    {% endif %}
+</div>
+</body>
+</html>
