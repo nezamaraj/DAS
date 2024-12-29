@@ -18,7 +18,6 @@
 <div class="container">
     <h1 class="text-center">Stock Data Viewer</h1>
 
-    <!-- Dropdown Form -->
     <form method="POST" action="/data" class="d-flex justify-content-center my-4">
         <div class="form-group me-2">
             <label for="issuer_code" class="form-label">Select Issuer Code:</label>
@@ -32,7 +31,6 @@
         <button type="submit" class="btn btn-primary">Filter</button>
     </form>
 
-    <!-- Stock Data Table -->
     {% if stock_data %}
     <table class="table table-bordered">
         <thead class="table-dark">
@@ -65,7 +63,6 @@
         </tbody>
     </table>
 
-    <!-- Go Back Button -->
     <div class="text-center mt-4">
         <a href="/" class="btn btn-secondary">Go Back</a>
     </div>

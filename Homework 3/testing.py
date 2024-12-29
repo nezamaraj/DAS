@@ -5,7 +5,6 @@ from bs4 import BeautifulSoup
 import time
 import mysql.connector
 from mysql.connector import Error
-from datetime import datetime, date
 
 conn = sqlite3.connect('mse_stock_data.db')
 cursor = conn.cursor()
@@ -27,27 +26,23 @@ cursor.execute('''
 ''')
 conn.commit()
 
-
 def create_mysql_connection():
     try:
         connection = mysql.connector.connect(
             host='localhost',
-            database='stock_data',  # The database you created
-            user='root',   # Your MySQL username
-            password='Applepcgame123$'  # Your MySQL password
+            database='stock_data',
+            user='root',
+            password='Applepcgame123$'
         )
         if connection.is_connected():
-            print("Connected to MySQL database")
             return connection
     except Error as e:
-        print("Error while connecting to MySQL", e)
         return None
 
 def get_issuer_codes():
     url = "https://www.mse.mk/en/stats/symbolhistory/TEL"
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
-
     retry_count = 0
     while retry_count < 5:
         response = requests.get(url, headers=headers)
@@ -58,16 +53,12 @@ def get_issuer_codes():
                             option.get("value") and not any(char.isdigit() for char in option.get("value"))]
             return issuer_codes
         elif response.status_code == 503:
-            print("Service unavailable (503). Retrying...")
             time.sleep(5)
             retry_count += 1
         else:
-            print(f"Failed to retrieve the webpage. Status code: {response.status_code}")
             return []
 
-    print("Failed after 5 retries. Exiting.")
     return []
-
 
 def get_stock_data(symbol, start_date, end_date):
     url = f"https://www.mse.mk/en/stats/symbolhistory/{symbol}"
@@ -106,32 +97,21 @@ def get_stock_data(symbol, start_date, end_date):
                     })
             return data
         elif response.status_code == 503:
-            print("Service unavailable (503). Retrying...")
             time.sleep(5)
             retry_count += 1
         else:
-            print(f"Failed to retrieve data for {symbol}. Status code: {response.status_code}")
             return []
 
-    print("Failed after 5 retries. Exiting.")
     return []
-
 
 def transform_data(raw_data):
     for record in raw_data:
         try:
             formatted_date = datetime.strptime(record['date'], "%m/%d/%Y").strftime("%Y-%m-%d")
-            print(f"Original date: {record['date']} -> Formatted date: {formatted_date}")
             record['date'] = formatted_date
         except Exception as e:
-            print(f"Error parsing date {record['date']}: {e}")
+            pass
     return raw_data
-
-
-
-def format_macedonian_number(number):
-    return f"{number:,.2f}".replace(",", ".").replace(".", ",", 1)
-
 
 def safe_format(value):
     return value if value is not None else 0.0
@@ -139,7 +119,6 @@ def safe_format(value):
 def store_data(issuer_code, cleaned_data, connection):
     cursor = connection.cursor()
     for record in cleaned_data:
-        print(f"Inserting record: {record}")
         cursor.execute(''' 
             INSERT IGNORE INTO stock_data 
             (issuer_code, date, last_trade_price, max_price, min_price, avg_price, percentage_change, volume, turnover_best, total_turnover)
@@ -159,7 +138,6 @@ def store_data(issuer_code, cleaned_data, connection):
     connection.commit()
     cursor.close()
 
-
 def get_dates(issuer_code, connection):
     cursor = connection.cursor()
     cursor.execute(''' 
@@ -173,21 +151,19 @@ def get_dates(issuer_code, connection):
     else:
         return None
 
-
 def main_pipeline():
     connection = create_mysql_connection()
     if connection is None:
-        print("Failed to connect to the database. Exiting.")
         return
 
     start_time = time.time()
     symbols = get_issuer_codes()
-    today = datetime.now().date()  # Use .date() to ensure 'today' is a date object
+    today = datetime.now().date()
 
     for symbol in symbols:
         last_date = get_dates(symbol, connection)
         if last_date is None:
-            start_date = today - timedelta(days=365 * 10)  # Ensure 'start_date' is a date object
+            start_date = today - timedelta(days=365 * 10)
             end_date = today
         else:
             start_date = last_date + timedelta(days=1)
@@ -201,9 +177,7 @@ def main_pipeline():
             start_date = end_date + timedelta(days=1)
 
     exec_time = time.time() - start_time
-    print(f"Execution time: {exec_time:.2f} seconds")
     connection.close()
-
 
 main_pipeline()
 conn.close()
