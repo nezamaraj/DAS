@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Data Viewer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <style>
+    body {
+    padding: 20px;
+}
+
+.table-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+table {
+    width: 45%; /* Limit the width of the tables */
+    table-layout: fixed; /* Ensure the content doesn't stretch too wide */
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 0; /* Ensure no extra padding around the table */
+}
+
+td, th {
+    text-align: center;
+    padding: 5px; /* Reduced padding to minimize extra space */
+    font-size: 12px; /* Adjust font size for smaller text */
+    line-height: 1.2; /* Prevent excessive space between lines */
+}
+
+td {
+    white-space: nowrap; /* Prevent text from overflowing */
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+}
+
+@media (max-width: 768px) {
+    .table-container {
+        display: block; /* Ensures the tables will still be side-by-side without wrapping */
+        overflow-x: auto; /* Allow horizontal scrolling if necessary */
+    }
+
+    table {
+        width: 100%; /* Make tables full width on smaller screens */
+        margin-bottom: 20px; /* Add space between tables */
+    }
+}
+
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="text-center">Stock Data Viewer</h1>
+
+    <!-- Dropdown Form -->
+    <form method="post" action="/data" class="d-flex justify-content-center my-4">
+        <div class="form-group me-2">
+            <label for="issuer_code" class="form-label">Select Issuer Code:</label>
+            <select name="issuer_code" id="issuer_code" class="form-select">
+                <option value="" disabled>Select an issuer code</option>
+                {% for code in issuer_codes %}
+                <option value="{{ code }}" {% if code == issuer_code %}selected{% endif %}>{{ code }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </form>
+
+    <!-- Tables with Stock Data and Technical Indicators -->
+    <div class="table-container">
+        <!-- First table with basic stock data -->
+        <table class="table table-bordered">
+            <thead class="table-dark">
+            <tr>
+                <th>Date</th>
+                <th>Last Trade Price</th>
+                <th>Max Price</th>
+                <th>Min Price</th>
+                <th>Avg Price</th>
+                <th>Percentage Change</th>
+                <th>Volume</th>
+                <th>Turnover Best</th>
+                <th>Total Turnover</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for row in stock_data %}
+            <tr>
+                <td>{{ row['date'] }}</td>
+                <td>{{ row['last_trade_price'] }}</td>
+                <td>{{ row['max_price'] }}</td>
+                <td>{{ row['min_price'] }}</td>
+                <td>{{ row['avg_price'] }}</td>
+                <td>{{ row['percentage_change'] }}</td>
+                <td>{{ row['volume'] }}</td>
+                <td>{{ row['turnover_best'] }}</td>
+                <td>{{ row['total_turnover'] }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Second table with Technical Indicators -->
+        <table class="table table-bordered">
+            <thead class="table-dark">
+            <tr>
+                <th>SMA 20</th>
+                <th>EMA 20</th>
+                <th>RSI</th>
+                <th>MACD</th>
+                <th>Stochastic</th>
+                <th>Buy/Sell Signals</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for row in stock_data %}
+            <tr>
+                <td>{{ row['SMA_20'] }}</td>
+                <td>{{ row['EMA_20'] }}</td>
+                <td>{{ row['RSI'] }}</td>
+                <td>{{ row['MACD'] }}</td>
+                <td>{{ row['Stochastic'] }}</td>
+                <td>
+                    SMA: {{ row['SMA_Signal'] }}<br>
+                    EMA: {{ row['EMA_Signal'] }}<br>
+                    RSI: {{ row['RSI_Signal'] }}<br>
+                    MACD: {{ row['MACD_Signal'] }}<br>
+                    Stochastic: {{ row['Stochastic_Signal'] }}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Go Back Button -->
+    <div class="text-center mt-4">
+        <a href="/" class="btn btn-secondary">Go Back</a>
+    </div>
+</div>
+</body>
+</html>
